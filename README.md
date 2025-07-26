@@ -2,7 +2,7 @@
 docs/StampS3.png
 StampS3 に繋がるピンの機能を図示しています。
 MO/GPIO13:MIDI OUT、Serial1 の TX ピンをアサインします
-MI/GPIO1:MIDI IN、Serial1 の RX ピンをアサインします
+MI/GPIO15:MIDI IN、Serial1 の RX ピンをアサインします
 「K\*」のラベルが付いているものは鍵盤の音程を示しています。
 KC は MIDI の C、ノートナンバー 60 です。
 KC#は C#、ノートナンバー 61
