@@ -40,6 +40,9 @@ unsigned long switchDebounceTime[NUM_SWITCHES] = {0};
 const int PWM_CHANNEL = 0;
 const int PWM_RESOLUTION = 4; // 4bit分解能で超低周波数対応
 
+// Last pressed note tracking
+int lastPressedNote = -1; // -1 means no note is currently being played
+
 float midiNoteToFrequency(byte note)
 {
   float baseFreq = 440.0 * pow(2.0, (note - 69) / 12.0);
@@ -152,6 +155,8 @@ void handleSwitch(int switchIndex) {
               octaveShift++;
               Serial.print("Octave Up - Current shift: ");
               Serial.println(octaveShift);
+              stopTone();
+              lastPressedNote = -1; // Reset last pressed note
             }
             break;
           case OD: // Octave Down
@@ -159,6 +164,8 @@ void handleSwitch(int switchIndex) {
               octaveShift--;
               Serial.print("Octave Down - Current shift: ");
               Serial.println(octaveShift);
+              stopTone();
+              lastPressedNote = -1; // Reset last pressed note
             }
             break;
           default: // Extension switches (CU, CD, S1, S2, S3)
@@ -194,6 +201,7 @@ void handleKey(int keyIndex) {
           Serial.print(" pressed - MIDI Note ");
           Serial.println(midiNote);
           sendMidiNoteOn(midiNote, VELOCITY);
+          lastPressedNote = midiNote; // Remember this as the last pressed note
           startTone(midiNote);
         }
       } else { // Button released (HIGH)
@@ -204,7 +212,12 @@ void handleKey(int keyIndex) {
           Serial.print(" released - MIDI Note ");
           Serial.println(midiNote);
           sendMidiNoteOff(midiNote);
-          stopTone();
+          
+          // Only stop tone if this was the last pressed note
+          if (midiNote == lastPressedNote) {
+            stopTone();
+            lastPressedNote = -1; // Reset last pressed note
+          }
         }
       }
     }
