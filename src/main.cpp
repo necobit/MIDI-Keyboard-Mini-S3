@@ -25,6 +25,7 @@ const byte VELOCITY = 110;
 const int NUM_KEYS = 13;
 const unsigned long debounceDelay = 50;
 int octaveShift = 0; // -5 to +5 octaves
+bool audioEnabled = true; // PWM audio on/off state
 
 // Key states
 bool keyPressed[NUM_KEYS] = {false};
@@ -65,6 +66,8 @@ void sendMidiNoteOff(byte note)
 
 void startTone(byte note)
 {
+  if (!audioEnabled) return; // Skip if audio is disabled
+  
   float frequency = midiNoteToFrequency(note);
   Serial.print("Starting tone at ");
   Serial.print(frequency);
@@ -116,9 +119,11 @@ void setup()
   delay(1000); // Wait for serial
   Serial.println("MIDI Keyboard - Refactored with unified switch handling");
   Serial.println("Keys: KC, KC#, KD, KD#, KE, KF, KF#, KG, KG#, KA, KA#, KB, KC+");
-  Serial.println("Switches: OU/OD (octave), CU/CD/S1/S2/S3 (extension)");
+  Serial.println("Switches: OU/OD (octave), CU/CD/S1/S2 (extension), S3 (audio toggle)");
   Serial.print("Current octave shift: ");
-  Serial.println(octaveShift);
+  Serial.print(octaveShift);
+  Serial.print(", Audio: ");
+  Serial.println(audioEnabled ? "enabled" : "disabled");
 }
 
 void loop()
@@ -168,7 +173,16 @@ void handleSwitch(int switchIndex) {
               lastPressedNote = -1; // Reset last pressed note
             }
             break;
-          default: // Extension switches (CU, CD, S1, S2, S3)
+          case S3: // Audio toggle switch (GPIO0)
+            audioEnabled = !audioEnabled;
+            Serial.print("Audio ");
+            Serial.println(audioEnabled ? "enabled" : "disabled");
+            if (!audioEnabled) {
+              stopTone(); // Stop current tone if disabling
+              lastPressedNote = -1; // Reset last pressed note
+            }
+            break;
+          default: // Other extension switches (CU, CD, S1, S2)
             Serial.print(switchNames[switchIndex]);
             Serial.println(" switch pressed");
             break;
