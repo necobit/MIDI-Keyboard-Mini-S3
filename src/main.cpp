@@ -6,6 +6,7 @@
 const int MIDI_TX_PIN = 13; // GPIO13 for MIDI OUT
 const int MIDI_RX_PIN = 15; // GPIO15 for MIDI IN
 const int PWM_PIN = 39;     // GPIO39 for PWM audio output
+#define LED_EN 38
 
 // FastLED setup for M5StampS3 internal LED
 #define LED_PIN 21 // M5StampS3 internal LED pin
@@ -154,6 +155,9 @@ void setup()
 
   Serial.begin(115200);
   Serial1.begin(31250, SERIAL_8N1, MIDI_RX_PIN, MIDI_TX_PIN);
+
+  pinMode(LED_EN, OUTPUT);
+  digitalWrite(LED_EN, HIGH); // Enable internal LED
 
   // Initialize FastLED
   FastLED.addLeds<WS2812, LED_PIN, GRB>(leds, NUM_LEDS);
